@@ -2,6 +2,8 @@ from enum import Enum
 import numpy as np
 import logging
 
+from siDynoReader.exceptions import ChannelNotFoundError
+
 logger = logging.getLogger(__name__)
 
 class Channel():
@@ -79,7 +81,10 @@ class DynoDataSet():
         Returns:
             str: name and unit of channel
         """
-        return f'{self.channels[channel_name.lower()].name} [{self.channels[channel_name.lower()].unit}]'.replace("_", " ")
+        try:
+            return f'{self.channels[channel_name.lower()].name} [{self.channels[channel_name.lower()].unit}]'.replace("_", " ")
+        except KeyError:
+            raise ChannelNotFoundError("Channel not found")
 
     def get_data(self, channel_name: str, type=None):
         try:
@@ -87,21 +92,27 @@ class DynoDataSet():
                 return self.channels[channel_name.lower()].data
             else:
                 return float(self.channels[channel_name.lower()].metric[type])
-        except Exception as e:
-            logger.error(f"Can't find channel name \"{channel_name}\"")
+        except KeyError:
+            raise ChannelNotFoundError("Channel not found")
             
     def get_measure_point(self, channel_name: str, type=MetricType.MEAN) -> list[float]:
         measure_point_data = []
-        for i in range(len(self.channels[channel_name.lower()].measure_points)):
-            measure_point_data.append(float(self.channels[channel_name.lower()].measure_points[i].metric[type]))
-        return measure_point_data
+        try:
+            for i in range(len(self.channels[channel_name.lower()].measure_points)):
+                measure_point_data.append(float(self.channels[channel_name.lower()].measure_points[i].metric[type]))
+            return measure_point_data
+        except KeyError:
+            raise ChannelNotFoundError("Channel not found")
     
     def get_measure_point_data(self, channel_name: str) -> list[list[float]]:
         measure_point_data = []
-        for measure_point in self.channels[channel_name.lower()].measure_points:
-            measure_point_data.append(measure_point.data)
-        return measure_point_data
-        
+        try:
+            for measure_point in self.channels[channel_name.lower()].measure_points:
+                measure_point_data.append(measure_point.data)
+            return measure_point_data
+        except KeyError:
+            raise ChannelNotFoundError("Channel not found")
+
     def __load_data(self, filepath: str) -> dict[str, Channel]:
         CHANNEL_NAME_INDEX = 0
         UNIT_NAME_INDEX = 1

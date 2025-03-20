@@ -1,6 +1,7 @@
 import os
 import unittest
 from siDynoReader import DynoDataSet, MetricType
+from siDynoReader.exceptions import ChannelNotFoundError
 
 class TestDynoDataSet(unittest.TestCase):
     def setUp(self):
@@ -19,6 +20,18 @@ class TestDynoDataSet(unittest.TestCase):
         """Test if channel name as parameter is case insensitive"""
         self.assertEqual(self.data_set.get_description("BSFC"), "BSFC [g/kWh]")
         self.assertEqual(self.data_set.get_description("bsfc"), "BSFC [g/kWh]")
+        self.assertEqual(self.data_set.get_description("bSFc"), "BSFC [g/kWh]")
+
+    def test_exception_wrong_channel_name(self):
+        """Test if the correct exception is raised if a channel name is used that doesn't exists"""
+        with self.assertRaises(ChannelNotFoundError):
+            self.data_set.get_description("BliBlaBlup")
+        with self.assertRaises(ChannelNotFoundError):
+            self.data_set.get_data("BliBlaBlup")
+        with self.assertRaises(ChannelNotFoundError):
+            self.data_set.get_measure_point("BliBlaBlup")
+        with self.assertRaises(ChannelNotFoundError):
+            self.data_set.get_measure_point_data("BliBlaBlup")
 
     def test_channel_list(self):
         """Test if the channel list is correct"""
