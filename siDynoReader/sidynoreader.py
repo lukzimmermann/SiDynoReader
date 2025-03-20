@@ -94,7 +94,6 @@ class DynoDataSet():
             elif type is not None and time_range is None:
                 return float(self.channels[channel_name.lower()].metric[type])
             elif type is None and time_range is not None:
-                print("type is None and time_range is not None")
                 time_indexes = self.__get_time_index(time_range)
                 return self.channels[channel_name.lower()].data[time_indexes[0]: time_indexes[1]]
             elif type is not None and time_range is not None:
@@ -195,13 +194,21 @@ class DynoDataSet():
         self.channels[time_channel_name.lower()].data -= min_value
 
     def __get_time_index(self, time_range: list[float]):
+        start_time = time_range[0]
+        end_time = time_range[1]
+
+        if start_time < self.get_data(self.time_channel_name, MetricType.MIN):
+            start_time = self.get_data(self.time_channel_name, MetricType.MIN)
+        if end_time >= self.get_data(self.time_channel_name, MetricType.MAX):
+            end_time = self.get_data(self.time_channel_name, MetricType.MAX)
+
         start_index = -np.inf
         end_index = np.inf
 
         for i, time_stamp in enumerate(self.channels[self.time_channel_name].data):
-            if time_range[0] <= time_stamp and start_index == -np.inf:
+            if start_time <= time_stamp and start_index == -np.inf:
                 start_index = i
-            if time_range[1] < time_stamp and end_index == np.inf:
+            if end_time <= time_stamp and end_index == np.inf:
                 end_index = i
                 break
 
