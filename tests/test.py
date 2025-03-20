@@ -40,6 +40,9 @@ class TestDynoDataSet(unittest.TestCase):
     def test_data_of_channel(self):
         """Test if the first five values of the channel name is correct"""
         self.assertEqual(self.data_set.get_data("Throttle")[:5], [0.0, 0.5, 1.0, 1.5, 2.0])
+        self.assertEqual(self.data_set.get_data("Throttle", MetricType.MEAN), 50)
+        self.assertEqual(self.data_set.get_data("Throttle", time_range=[44, 46.5]), [44.0, 44.5, 45.0, 45.5, 46.0])
+        self.assertEqual(self.data_set.get_data("Throttle", time_range=[44, 46.5], type=MetricType.MEAN), 45)
 
     def test_measure_points(self):
         """Test whether the measuring points have been extracted correctly"""
