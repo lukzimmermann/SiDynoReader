@@ -54,6 +54,7 @@ class DynoDataSet():
         self.test_id = filepath.replace("\\", "/").split("/")[-1].split("-")[-1].split(".")[0]
         self.dyno = filepath.replace("\\", "/").split("/")[-1].split("-")[0]
         self.project = filepath.split(".")[-1]
+        self.time_channel_name = time_channel_name
         self.channels = self.__load_data(filepath)
         if time_to_zero:
             self.__set_start_time_to_zero(time_channel_name)
@@ -86,12 +87,19 @@ class DynoDataSet():
         except KeyError:
             raise ChannelNotFoundError("Channel not found")
 
-    def get_data(self, channel_name: str, type=None):
+    def get_data(self, channel_name: str, type: MetricType=None, time_range: list[float]=None):
         try:
-            if type is None:
+            if type is None and time_range is None:
                 return self.channels[channel_name.lower()].data
-            else:
+            elif type is not None and time_range is None:
                 return float(self.channels[channel_name.lower()].metric[type])
+            elif type is None and time_range is not None:
+                print("type is None and time_range is not None")
+                time_indexes = self.__get_time_index(time_range)
+                return self.channels[channel_name.lower()].data[time_indexes[0]: time_indexes[1]]
+            elif type is not None and time_range is not None:
+                time_indexes = self.__get_time_index(time_range)
+                return self.__calculate_metric_of_list(self.channels[channel_name.lower()].data[time_indexes[0]: time_indexes[1]])[type]
         except KeyError:
             raise ChannelNotFoundError("Channel not found")
             
@@ -146,7 +154,7 @@ class DynoDataSet():
 
         return dictionary
     
-    def __calculate_metric_of_list(self, data = list[float]) -> dict[MetricType, list[float]]:
+    def __calculate_metric_of_list(self, data = list[float]) -> dict[MetricType, float]:
             metric: dict[MetricType, list[float]] = {}
 
             metric[MetricType.MEAN] = np.mean(data)
@@ -185,3 +193,16 @@ class DynoDataSet():
     def __set_start_time_to_zero(self, time_channel_name: str):
         min_value = np.min(self.channels[time_channel_name.lower()].data)
         self.channels[time_channel_name.lower()].data -= min_value
+
+    def __get_time_index(self, time_range: list[float]):
+        start_index = -np.inf
+        end_index = np.inf
+
+        for i, time_stamp in enumerate(self.channels[self.time_channel_name].data):
+            if time_range[0] <= time_stamp and start_index == -np.inf:
+                start_index = i
+            if time_range[1] < time_stamp and end_index == np.inf:
+                end_index = i
+                break
+
+        return [start_index, end_index]
