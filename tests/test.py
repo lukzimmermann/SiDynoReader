@@ -1,6 +1,6 @@
 import os
 import unittest
-from siDynoReader.siDynoReader import DynoDataSet, MetricType
+from siDynoReader import DynoDataSet, MetricType
 
 class TestDynoDataSet(unittest.TestCase):
     def setUp(self):
