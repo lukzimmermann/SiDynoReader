@@ -44,9 +44,7 @@ The following functions and properties return various metadata of the data set:
 print(f"Project: {data.project}")
 print(f"Dyno: {data.dyno}")
 print(f"TestId: {data.test_id}")
-```
 
-```bash
 Project: 001
 Dyno: demoData
 TestId: 00002
@@ -55,27 +53,15 @@ TestId: 00002
 The following function can be used to query all channels:
 ```python
 print(data.get_channels())
-```
-```bash
+
 ['Time', 'Throttle', 'Power', 'Test_State']
 ```
 
 Um den Namen und die Einheit eines Kanals abzufragen, kann folgender Befehl genutzt werden. Der Kanalname ist dabei case insensitiv. Diese Funktion ist für Achsbeschriftungen nützlich.
 ```python
 print(data.get_description("power"))
-```
-```python
-print(data.get_data("Power")[:5])
 
-print(data.get_data(channel_name="Time",
-                    time_range=[10,15]))
-
-print(data.get_data(channel_name="Time",
-                    metric=MetricType.MEDIAN))
-
-print(data.get_data(channel_name="Time",
-                    time_range=[10,15],
-                    metric=MetricType.MEAN))
+Power [kW]
 ```
 
 ### Get data
@@ -105,8 +91,7 @@ print(data.get_data(channel_name="Time",
 print(data.get_data(channel_name="Time",
                     time_range=[10,15],
                     metric=MetricType.MEAN))
-```
-```bash
+
 [0.0, 0.0875, 0.175, 0.2625, 0.35]
 [10.  10.5 11.  11.5 12.  12.5 13.  13.5 14.  14.5]
 50.0
@@ -122,8 +107,7 @@ The use of the function for measuring points is shown below. If no metric type i
 ```Python
 print(data.get_measure_point("Throttle"))
 print(data.get_measure_point("Throttle", metric=MetricType.MIN))
-```
-```bash
+
 [13.5, 39.5, 65.5, 91.5]
 [7.0, 33.0, 59.0, 85.0]
 ```
@@ -131,8 +115,7 @@ print(data.get_measure_point("Throttle", metric=MetricType.MIN))
 If all data of a measuring point is required, for example for a box plot, this can be achieved with the following function:
 ```Python
 print(data.get_measure_point_data("Throttle"))
-```
-```bash
+
 [[7.0, 7.5, ...], [33.0, 33.5, ...], [59.0, 59.5, ...], [85.0, 85.5, ...]]
 ```
 
