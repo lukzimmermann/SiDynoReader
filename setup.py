@@ -4,8 +4,8 @@ with open("README.md", "r") as file:
     description = file.read()
 
 setup(
-    name="sidynoreader",
-    version='0.1.5',
+    name="si-dyno-reader",
+    version='0.0.1',
     packages=find_packages(),
     install_requires=[
         'numpy==2.0.2'

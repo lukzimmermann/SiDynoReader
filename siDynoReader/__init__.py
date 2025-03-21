@@ -1,1 +1,1 @@
-from .sidynoreader import DynoDataSet, MetricType
+from .si_dyno_reader import DynoDataSet, MetricType
