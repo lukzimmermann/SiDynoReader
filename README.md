@@ -116,7 +116,7 @@ print(data.get_data(channel_name="Time",
 ### MeasurePoints and TestState
 If measuring points are defined using a specific channel, metrics are automatically created for them. This means, for example, that the average value for a measuring point can be queried. The following graphic visualizes how the measuring points are created. The green area represents a measuring point. In the left graphic, the threshold is defined at ```50.0```. This means that a measuring point is created as soon as the value of the test channel exceeds the threshold of ```50.0``` here.
 
-![TestState](https://raw.githubusercontent.com/lukzimmermann/SiDynoReader/refs/heads/main/doc/img/test_state.svg)
+![TestState](https://raw.githubusercontent.com/lukzimmermann/SiDynoReader/refs/heads/main/doc/img/test_state.png)
 
 The use of the function for measuring points is shown below. If no metric type is specified, the average value of the individual measuring points is returned by default. If a different metric type is required, this can also be defined. 
 ```Python
