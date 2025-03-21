@@ -1,8 +1,9 @@
 from enum import Enum
+from math import exp
 import numpy as np
 import logging
 
-from siDynoReader.exceptions import ChannelNotFoundError
+from siDynoReader.exceptions import ChannelNotFoundError, TestChannelNotFoundError
 
 logger = logging.getLogger(__name__)
 
@@ -51,14 +52,19 @@ class DynoDataSet():
                  test_state_threshold=50.0,
                  time_channel_name="time",
                  time_to_zero=True):
+        
         self.test_id = filepath.replace("\\", "/").split("/")[-1].split("-")[-1].split(".")[0]
         self.dyno = filepath.replace("\\", "/").split("/")[-1].split("-")[0]
         self.project = filepath.split(".")[-1]
         self.time_channel_name = time_channel_name
+        
         self.channels = self.__load_data(filepath)
         if time_to_zero:
             self.__set_start_time_to_zero(time_channel_name)
-        self.__extract_measure_points(test_state_channel_name, test_state_threshold)
+        try:
+            self.__extract_measure_points(test_state_channel_name, test_state_threshold)
+        except Exception as e:
+            logger.error("Error: {}".format(str(e).replace("'", "")))
         self.__calculate_metric_for_channel()
 
     def get_channels(self):
@@ -87,26 +93,26 @@ class DynoDataSet():
         except KeyError:
             raise ChannelNotFoundError("Channel not found")
 
-    def get_data(self, channel_name: str, type: MetricType=None, time_range: list[float]=None):
+    def get_data(self, channel_name: str, metric: MetricType=None, time_range: list[float]=None):
         try:
-            if type is None and time_range is None:
+            if metric is None and time_range is None:
                 return self.channels[channel_name.lower()].data
-            elif type is not None and time_range is None:
-                return float(self.channels[channel_name.lower()].metric[type])
-            elif type is None and time_range is not None:
+            elif metric is not None and time_range is None:
+                return float(self.channels[channel_name.lower()].metric[metric])
+            elif metric is None and time_range is not None:
                 time_indexes = self.__get_time_index(time_range)
                 return self.channels[channel_name.lower()].data[time_indexes[0]: time_indexes[1]]
-            elif type is not None and time_range is not None:
+            elif metric is not None and time_range is not None:
                 time_indexes = self.__get_time_index(time_range)
-                return self.__calculate_metric_of_list(self.channels[channel_name.lower()].data[time_indexes[0]: time_indexes[1]])[type]
+                return self.__calculate_metric_of_list(self.channels[channel_name.lower()].data[time_indexes[0]: time_indexes[1]])[metric]
         except KeyError:
             raise ChannelNotFoundError("Channel not found")
             
-    def get_measure_point(self, channel_name: str, type=MetricType.MEAN) -> list[float]:
+    def get_measure_point(self, channel_name: str, metric=MetricType.MEAN) -> list[float]:
         measure_point_data = []
         try:
             for i in range(len(self.channels[channel_name.lower()].measure_points)):
-                measure_point_data.append(float(self.channels[channel_name.lower()].measure_points[i].metric[type]))
+                measure_point_data.append(float(self.channels[channel_name.lower()].measure_points[i].metric[metric]))
             return measure_point_data
         except KeyError:
             raise ChannelNotFoundError("Channel not found")
@@ -173,21 +179,24 @@ class DynoDataSet():
                 measurement_point.metric = self.__calculate_metric_of_list(measurement_point.data)    
 
     def __extract_measure_points(self, test_state_channel_name: str, test_state_threshold: float):
-        is_measure_point = False
-        for i, state_value in enumerate(self.channels[test_state_channel_name.lower()].data):
+        try:
+            is_measure_point = False
+            for i, state_value in enumerate(self.channels[test_state_channel_name.lower()].data):
 
-            if not is_measure_point and state_value >= test_state_threshold:
-                for channel in self.channels.values():
-                    measure_point = MeasurePoint()
-                    channel.measure_points.append(measure_point)
-                    is_measure_point = True
-            
-            if is_measure_point:
-                for channel in self.channels.values():
-                    channel.measure_points[-1].data.append(channel.data[i])
+                if not is_measure_point and state_value >= test_state_threshold:
+                    for channel in self.channels.values():
+                        measure_point = MeasurePoint()
+                        channel.measure_points.append(measure_point)
+                        is_measure_point = True
 
-            if state_value < test_state_threshold:
-                is_measure_point = False
+                if is_measure_point:
+                    for channel in self.channels.values():
+                        channel.measure_points[-1].data.append(channel.data[i])
+
+                if state_value < test_state_threshold:
+                    is_measure_point = False
+        except:
+            raise TestChannelNotFoundError(f"Could not finde test channel with the name \"{test_state_channel_name}\"")
 
     def __set_start_time_to_zero(self, time_channel_name: str):
         min_value = np.min(self.channels[time_channel_name.lower()].data)
