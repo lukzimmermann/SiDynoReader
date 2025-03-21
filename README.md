@@ -5,7 +5,7 @@ This package can be used to read CSV files. It creates an object which makes the
 ## How to install
 This code is available as a pip package. The package can be installed with the following command:
 ```bash
-pip install sidynoreader
+pip install si-dyno-reader
 ```
 
 ## Supported CSV format
