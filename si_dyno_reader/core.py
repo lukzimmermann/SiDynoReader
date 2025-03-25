@@ -1,9 +1,8 @@
 from enum import Enum
-from math import exp
 import numpy as np
 import logging
 
-from siDynoReader.exceptions import ChannelNotFoundError, TestChannelNotFoundError
+from .exceptions import ChannelNotFoundError, TestChannelNotFoundError
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +58,7 @@ class DynoDataSet():
         self.time_channel_name = time_channel_name
         
         self.channels = self.__load_data(filepath)
+
         if time_to_zero:
             self.__set_start_time_to_zero(time_channel_name)
         try:
@@ -160,7 +160,7 @@ class DynoDataSet():
         return dictionary
     
     def __calculate_metric_of_list(self, data = list[float]) -> dict[MetricType, float]:
-            metric: dict[MetricType, list[float]] = {}
+            metric: dict[MetricType, float] = {}
 
             metric[MetricType.MEAN] = np.mean(data)
             metric[MetricType.MEDIAN] = np.median(data)

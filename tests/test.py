@@ -1,7 +1,6 @@
 import os
 import unittest
-from siDynoReader import DynoDataSet, MetricType
-from siDynoReader.exceptions import ChannelNotFoundError
+from si_dyno_reader import DynoDataSet, MetricType, ChannelNotFoundError
 
 class TestDynoDataSet(unittest.TestCase):
     def setUp(self):

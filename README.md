@@ -21,7 +21,7 @@ s	    %	        kW	       -
 
 ## How to use
 
-The following sections show how this package can be used together with ```Matplotlib`` for visualization
+The following sections show how this package can be used together with ```Matplotlib``` for visualization
 
 ### Load the CSV File
 
